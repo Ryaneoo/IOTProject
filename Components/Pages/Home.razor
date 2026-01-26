@@ -1,0 +1,66 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+@inject SensorState SensorState
+@implements IDisposable
+@rendermode InteractiveServer
+<h1>Hello, User!</h1>
+
+<h2>Welcome to your app to control the air-conditioning system!</h2>
+<br />
+<h3>Live Sensor Data</h3>
+
+@if (SensorState.Latest is null)
+{
+    <p><em>Waiting for MQTT data…</em></p>
+}
+else
+{
+    <div class="sensor-card">
+        <div class="sensor-item">
+            <span class="label"> Temperature</span>
+            <span class="value">@SensorState.Latest.Temperature.ToString("0.0") °C</span>
+        </div>
+
+        <div class="sensor-item">
+            <span class="label"> Humidity</span>
+            <span class="value">@SensorState.Latest.Humidity.ToString("0.0") %</span>
+        </div>
+
+        <div class="sensor-item">
+            <span class="label"> Pressure</span>
+            <span class="value">@SensorState.Latest.Pressure.ToString("0.0") hPa</span>
+        </div>
+
+        <div class="sensor-time">
+             Updated: @SensorState.Latest.Timestamp.ToLocalTime()
+        </div>
+    </div>
+}
+@code {
+    private PeriodicTimer? _timer;
+    private CancellationTokenSource? _cts;
+
+    protected override void OnInitialized()
+    {
+        _cts = new CancellationTokenSource();
+        _timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+
+        _ = RunUiRefreshLoop(_cts.Token);
+    }
+
+    private async Task RunUiRefreshLoop(CancellationToken token)
+    {
+        while (_timer != null && await _timer.WaitForNextTickAsync(token))
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+        try { _cts?.Cancel(); } catch { }
+        _timer?.Dispose();
+        _cts?.Dispose();
+    }
+}

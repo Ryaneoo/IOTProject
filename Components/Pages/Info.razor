@@ -1,0 +1,20 @@
+﻿@page "/info"
+@using Microsoft.Web.WebView2.WinForms
+@using Microsoft.Web.WebView2.Wpf
+<PageTitle>Info</PageTitle>
+<container>
+    <h1 style="text-align:center;"> Readings from BME280 </h1>
+<div style="display:grid; grid-template-columns:repeat(1, 1fr); gap:16px; height:80vh;">
+    <iframe src="http://localhost:3000/d-solo/wepNH6SDk/project?refresh=5s&orgId=1&panelId=6"
+            style="width:100%; height:100%; border:0;">
+    </iframe>
+
+    <iframe src="http://localhost:3000/d-solo/wepNH6SDk/project?refresh=5s&orgId=1&panelId=4"
+            style="width:100%; height:100%; border:0;">
+    </iframe>
+
+    <iframe src="http://localhost:3000/d-solo/wepNH6SDk/project?refresh=5s&orgId=1&panelId=2"
+            style="width:100%; height:100%; border:0;">
+    </iframe>
+</div>
+</container>
