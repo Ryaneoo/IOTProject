@@ -16,6 +16,7 @@
 }
 else
 {
+    //getting all of the data to display 
     <div class="sensor-card">
         <div class="sensor-item">
             <span class="label"> Temperature</span>
@@ -42,7 +43,7 @@ else
     private PeriodicTimer? _timer;
     private CancellationTokenSource? _cts;
 
-    protected override void OnInitialized()
+    protected override void OnInitialized() //to run the refresh function to continously display new data from the MQTT via subscribing
     {
         _cts = new CancellationTokenSource();
         _timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
@@ -50,7 +51,7 @@ else
         _ = RunUiRefreshLoop(_cts.Token);
     }
 
-    private async Task RunUiRefreshLoop(CancellationToken token)
+    private async Task RunUiRefreshLoop(CancellationToken token) //refresh function updates the page when new data has been received
     {
         while (_timer != null && await _timer.WaitForNextTickAsync(token))
         {
@@ -58,7 +59,7 @@ else
         }
     }
 
-    public void Dispose()
+    public void Dispose() //once current page change, discard variables to prevent overall program from being affected
     {
         try { _cts?.Cancel(); } catch { }
         _timer?.Dispose();
