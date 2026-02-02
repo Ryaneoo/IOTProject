@@ -8,7 +8,7 @@
 
 <h2>Welcome to your app to control the air-conditioning system!</h2>
 <br />
-<h3>Live Sensor Data</h3>
+<h3>Live Sensor Data (1 d.p)</h3>
 
 @if (SensorState.Latest is null)
 {
@@ -38,6 +38,7 @@ else
     </div>
 }
 @code {
+    // _ is used so that it will be forgotten , a fire and forget method, as the remaining data is not important
     private PeriodicTimer? _timer;
     private CancellationTokenSource? _cts;
 

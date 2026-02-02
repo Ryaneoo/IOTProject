@@ -1,7 +1,77 @@
 ﻿@page "/switch"
 @rendermode InteractiveServer
-
+@using Microsoft.Extensions.Hosting;
+@using MQTTnet;
+@using System.Text;
+@inject IJSRuntime JS
+@using MQTTnet.Protocol;
 <PageTitle>Turn On/Off</PageTitle>
 
-<h1>Click to Turn On or Turn Off the air conditioning system</h1>
+<h1>Click to Turn On, Turn Off or set the air conditioning system to automatic</h1>
+<div>
+    @* On button click to do the assigned task *@
+    <button class="btn btn-primary"
+            @onclick="async () => await Activate('O')">
+        Turn On 
+    </button>
+    <button class="btn btn-primary"
+            @onclick="async () => await Activate('X')">
+        Turn Off (not adviced)
+    </button>
+    <button class="btn btn-primary"
+            @onclick="async () => await Activate('A')">
+        Set Automatic
+    </button>
+</div>
+<script>
+    @* To show if task was done*@
+    function showAlert() {
+        alert("Task executed successfully");
+    }
+</script>
+@code{
+    private IMqttClient? client;//allows subscribing to MQTT
+    //initalise all variables needed for subscribing
 
+    private const string Broker = "test.mosquitto.org";
+    private const int Port = 1883;
+    private const string Topic = "tp/eng/iotp_project/grp_02/fan";
+    private char? command; // can be null and is always changing
+    protected override async Task OnInitializedAsync() //on start to initalise
+    {
+        // using MQTT client
+            var factory = new MqttClientFactory();
+            client = factory.CreateMqttClient();
+            // initalising the connection
+            var destination = new MqttClientOptionsBuilder()
+                .WithClientId($"blazor-{Guid.NewGuid():N}") //unique id used to ensure a connection between devices
+                .WithTcpServer(Broker, Port) // Use your broker address and port
+                .WithCleanSession()
+                .Build();
+                //connect 
+            await client.ConnectAsync(destination, CancellationToken.None);
+        
+    }
+    private async Task Activate(char x)
+    {
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic(Topic) // Set your topic
+            .WithPayload(x.ToString()) // Set your message payload depending on turn on or turn off
+            .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce) // Set QoS to 1 
+            .WithRetainFlag(false) // Set retain flag
+            .Build();
+
+        // Publish the message
+        await client.PublishAsync(message, CancellationToken.None);
+        await JS.InvokeVoidAsync("showAlert");
+    }
+    public async ValueTask DisposeAsync() //runs when the current page changes
+    {
+        try
+        {
+            if (client is not null && client.IsConnected)
+                await client.DisconnectAsync(); //prevents accidental sending of message
+        }
+        catch { }
+    }
+} 

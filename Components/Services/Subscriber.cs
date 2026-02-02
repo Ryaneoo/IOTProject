@@ -5,27 +5,29 @@ using MQTTnet;
 
 public class MqttSubscriber : BackgroundService
 {
-    private readonly SensorState _state;
-    private IMqttClient? _client;
-
+    // _ is used so that it will be forgotten , a fire and forget method, as the remaining data is not important
+    private readonly SensorState _state; //allows reading of sensor readings
+    private IMqttClient? _client; //allows subscribing to MQTT
+    //initalise all variables needed for subscribing
     private const string Broker = "test.mosquitto.org";
     private const int Port = 1883;
     private const string Topic = "tp/eng/iotp_project/grp_02/bme280";
 
-    public MqttSubscriber(SensorState state) => _state = state;
+    public MqttSubscriber(SensorState state) => _state = state; //update of state
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var factory = new MqttClientFactory();
-        _client = factory.CreateMqttClient(); 
+        _client = factory.CreateMqttClient(); //using MQTT client
 
-        _client.ApplicationMessageReceivedAsync += e =>
+        _client.ApplicationMessageReceivedAsync += e => //adds the data on message recieved (subscriber)
         {
             try
             {
-                var payload = e.ApplicationMessage.ConvertPayloadToString();
+                //converts received message to string then json 
+                var payload = e.ApplicationMessage.ConvertPayloadToString(); 
                 var doc = JsonDocument.Parse(payload);
-
+                // sets the variable to the assigned data
                 var reading = new SensorReading
                 {
                     Temperature = doc.RootElement.GetProperty("temperature").GetDouble(),
@@ -37,10 +39,10 @@ public class MqttSubscriber : BackgroundService
                 _state.SetLatest(reading);
             }
             catch { }
-
+  
             return Task.CompletedTask;
         };
-
+        //initalising the connection
         var options = new MqttClientOptionsBuilder()
             .WithTcpServer(Broker, Port)
             .WithCleanSession()
@@ -61,7 +63,7 @@ public class MqttSubscriber : BackgroundService
         {
             await Task.Delay(1000, stoppingToken);
         }
-
+        //if connected, disconnects, so it can re-connect from the start to get the new info
         if (_client.IsConnected)
             await _client.DisconnectAsync();
     }
