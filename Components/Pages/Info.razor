@@ -3,7 +3,8 @@
 @using Microsoft.Web.WebView2.Wpf
 @rendermode InteractiveServer
 <PageTitle>Info</PageTitle>
-<container>
+<container> 
+    @*Display of graphs*@
     <h1 style="text-align:center;"> Readings from BME280 </h1>
 <div style="display:grid; grid-template-columns:repeat(1, 1fr); gap:16px; height:80vh;">
     <iframe src="http://localhost:3000/d-solo/wepNH6SDk/project?refresh=5s&orgId=1&panelId=6"

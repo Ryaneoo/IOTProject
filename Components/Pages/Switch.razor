@@ -1,70 +1,79 @@
 ﻿@page "/switch"
 @rendermode InteractiveServer
-@using Microsoft.Extensions.Hosting;
-@using MQTTnet;
-@using System.Text;
+@using MQTTnet
+@using MQTTnet.Client
+@using MQTTnet.Client.Options
+@using MQTTnet.Protocol
+@using System.Security.Authentication
 @inject IJSRuntime JS
-@using MQTTnet.Protocol;
+
 <PageTitle>Turn On/Off</PageTitle>
 
 <h1>Click to Turn On, Turn Off or set the air conditioning system to automatic</h1>
+@* On button click to do the assigned task *@
 <div>
-    @* On button click to do the assigned task *@
-    <button class="btn btn-primary"
-            @onclick="async () => await Activate('O')">
-        Turn On 
-    </button>
-    <button class="btn btn-primary"
-            @onclick="async () => await Activate('X')">
-        Turn Off (not adviced)
-    </button>
-    <button class="btn btn-primary"
-            @onclick="async () => await Activate('A')">
-        Set Automatic
-    </button>
+    <button class="btn btn-primary" @onclick="async () => await Activate('O')">Turn On</button>
+    <button class="btn btn-primary" @onclick="async () => await Activate('X')">Turn Off (not advised)</button>
+    <button class="btn btn-primary" @onclick="async () => await Activate('A')">Set Automatic</button>
 </div>
+
 <script>
     @* To show if task was done*@
     function showAlert() {
         alert("Task executed successfully");
     }
 </script>
-@code{
-    private IMqttClient? client;//allows subscribing to MQTT
-    //initalise all variables needed for subscribing
 
-    private const string Broker = "test.mosquitto.org";
-    private const int Port = 1883;
+@code {
+    private IMqttClient? client;
+    //allows subscribing to MQTT
+    //initalise all variables needed for subscribing
+    private const string Broker = "ab4d2e8a48a6402ca2ff5ec16a2b05a2.s1.eu.hivemq.cloud";
+    private const int Port = 8883;
     private const string Topic = "tp/eng/iotp_project/grp_02/fan";
-    private char? command; // can be null and is always changing
+
+    // HiveMQ Cloud credentials
+    private const string Username = "iotp_grp02";
+    private const string Password = "Iotp_grp02";
+
     protected override async Task OnInitializedAsync() //on start to initalise
+
     {
-        // using MQTT client
-            var factory = new MqttClientFactory();
-            client = factory.CreateMqttClient();
-            // initalising the connection
-            var destination = new MqttClientOptionsBuilder()
-                .WithClientId($"blazor-{Guid.NewGuid():N}") //unique id used to ensure a connection between devices
-                .WithTcpServer(Broker, Port) // Use your broker address and port
-                .WithCleanSession()
-                .Build();
-                //connect 
-            await client.ConnectAsync(destination, CancellationToken.None);
-        
-    }
-    private async Task Activate(char x)
-    {
-        var message = new MqttApplicationMessageBuilder()
-            .WithTopic(Topic) // Set your topic
-            .WithPayload(x.ToString()) // Set your message payload depending on turn on or turn off
-            .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce) // Set QoS to 1 
-            .WithRetainFlag(false) // Set retain flag
+        var factory = new MqttFactory();              
+        client = factory.CreateMqttClient();
+
+        var options = new MqttClientOptionsBuilder()
+            .WithClientId($"blazor-{Guid.NewGuid():N}") //unique id used to ensure a connection between devices
+            .WithTcpServer(Broker, Port)// Uses the broker address and port
+            .WithCredentials(Username, Password)//to access hive
+            .WithCleanSession()
+            .WithTls(new MqttClientOptionsBuilderTlsParameters  //allows access of using hive
+            {
+                UseTls = true,
+                SslProtocol = SslProtocols.Tls12
+            })
             .Build();
 
-        // Publish the message
-        await client.PublishAsync(message, CancellationToken.None);
+        await client.ConnectAsync(options);
+    }
+
+    private async Task Activate(char x)
+    {
+        if (client is null || !client.IsConnected)
+            return;
+
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic(Topic)// Set your topic
+            .WithPayload(x.ToString()) // Set your message payload depending on turn on or turn off
+
+            .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce) // Set QoS to 1
+            .WithRetainFlag(false)  // Set retain flag
+            .Build();
+
+        await client.PublishAsync(message);   // Publish the message
         await JS.InvokeVoidAsync("showAlert");
     }
+
     public async ValueTask DisposeAsync() //runs when the current page changes
     {
         try
@@ -74,4 +83,4 @@
         }
         catch { }
     }
-} 
+}

@@ -1,11 +1,23 @@
-﻿using System.Threading;
-
-public class SensorState
+﻿public class SensorState
 {
-    // _ is used so that it will be forgotten , a fire and forget method, as the remaining data is not important
-    private SensorReading? _latest; //initalise variable
-    public SensorReading? Latest => _latest; //initalise variable public to allow passing data to Info.razor and Home.razor
+    public SensorReading? Latest { get; private set; } //gets the latest reading and all of the info below
 
-    public void SetLatest(SensorReading reading) => Interlocked.Exchange(ref _latest, reading);
-    // be able to consistently update the reading to change based on the latest reading received interlocked.exchange is used as this is runs in the back
+    public string? LastTopic { get; private set; }
+    public string? LastRawPayload { get; private set; }
+    public string? LastError { get; private set; }
+
+    public void SetLatest(SensorReading reading, string? topic = null, string? raw = null) //tracks last recieved, used for debugging only
+    {
+        Latest = reading;
+        LastTopic = topic;
+        LastRawPayload = raw;
+        LastError = null;
+    }
+
+    public void SetError(string error, string? topic = null, string? raw = null) //gets the error if there is, used for debugging only 
+    {
+        LastError = error;
+        LastTopic = topic;
+        LastRawPayload = raw;
+    }
 }
