@@ -8,7 +8,7 @@
 @inject IJSRuntime JS
 
 <PageTitle>Turn On/Off</PageTitle>
-
+@* Control system for the air-conditioning system (fan) *@
 <h1 class="text-center mb-4">Air Conditioning Control Panel</h1>
 
 <div class="ac-container">
@@ -19,17 +19,17 @@
         </h4>
 
         <div class="d-grid gap-3">
-
+            @* Keep the fan running perpetually *@
             <button class="btn btn-success btn-lg ac-btn"
                     @onclick="async () => await Activate('O')">
                 Turn On
             </button>
-
+            @* Switch it off for good *@
             <button class="btn btn-danger btn-lg ac-btn"
                     @onclick="async () => await Activate('X')">
                  Turn Off
             </button>
-
+            @* Letting the fan run automatically depending on the various conditions *@
             <button class="btn btn-info btn-lg ac-btn"
                     @onclick="async () => await Activate('A')">
                  Automatic Mode

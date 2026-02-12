@@ -9,14 +9,14 @@
 @implements IAsyncDisposable
 @inject LoadingBayState LoadingBayState
 <PageTitle>Turn On/Off</PageTitle>
-
-<h1 class="text-center mb-4">Servo Motor Control Panel</h1>
-@if (LoadingBayState.Latest is null)
+@* Control the door for unloading of deliveries/packages *@
+<h1 class="text-center mb-4">Door Control Panel</h1>
+@if (LoadingBayState.Latest is null) //waits to retrieve loading bay state status
 {
     <p><em>Waiting for MQTT data…</em></p>
 }
 else
-{
+{//display loading bay state status : OCCUPIED/UNOCCUPIED
     <div class="sensor-item">
         <span class="label"> Loading Bay Current Status</span>
         <span class="value">@LoadingBayState.Latest.LoadingBayStatus.ToString() </span>
@@ -30,12 +30,12 @@ else
         </h4>
 
         <div class="d-grid gap-3">
-
-            <button class="btn btn-success btn-lg ac-btn"
-                    @onclick="async () => await Activate('O')">
+            @* opens the door for package recieving *@
+            <button class="btn btn-success btn-lg ac-btn" 
+                    @onclick="async () => await Activate('O')"> 
                 Open (Servo Motor)
             </button>
-
+            @* closes the door *@
             <button class="btn btn-danger btn-lg ac-btn"
                     @onclick="async () => await Activate('C')">
                  Close (Servo Motor)

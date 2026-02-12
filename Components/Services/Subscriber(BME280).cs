@@ -28,7 +28,7 @@ public class MqttSubscriber : BackgroundService
         var factory = new MqttFactory();
         _client = factory.CreateMqttClient(); //using MQTT client
 
-        _client.UseConnectedHandler(_ =>
+        _client.UseConnectedHandler(_ =>//console logging used for debugging
         {
             Console.WriteLine("MQTT connected");
         });
@@ -59,11 +59,11 @@ public class MqttSubscriber : BackgroundService
                     Timestamp = DateTime.UtcNow
                 };
 
-                _state.SetLatest(reading, topic, payload);
+                _state.SetLatest(reading, topic, payload); //updating the class based on latest recieved data
             }
             catch (Exception ex)
             {
-                _state.SetError(ex.Message, topic, payload);
+                _state.SetError(ex.Message, topic, payload); //if error encountered display it(used for debugging)
             }
         });
         //initalising the connection
@@ -81,7 +81,7 @@ public class MqttSubscriber : BackgroundService
         // connection check via debugging 
         try
         {
-            Console.WriteLine("Connecting...");
+            Console.WriteLine("Connecting..."); //console logging used for debugging
             await _client.ConnectAsync(options);
             Console.WriteLine("ConnectAsync done. IsConnected=" + _client.IsConnected);
 

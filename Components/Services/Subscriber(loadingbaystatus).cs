@@ -59,11 +59,11 @@ public class MqttSubscribers : BackgroundService
                     LoadingBayStatus = doc.RootElement.GetProperty("loadingBayStatus").GetString()
                 };
 
-                _states.SetLatest(reading, topic, payload);
+                _states.SetLatest(reading, topic, payload);  //updating the class based on latest recieved data
             }
             catch (Exception ex)
             {
-                _states.SetError(ex.Message, topic, payload);
+                _states.SetError(ex.Message, topic, payload); //if error encountered display it(used for debugging)
             }
         });
         //initalising the connection
@@ -81,7 +81,7 @@ public class MqttSubscribers : BackgroundService
         // connection check via debugging 
         try
         {
-            Console.WriteLine("Connecting...");
+            Console.WriteLine("Connecting..."); //console logging used for debugging
             await _clients.ConnectAsync(options);
             Console.WriteLine("ConnectAsync done. IsConnected=" + _clients.IsConnected);
 

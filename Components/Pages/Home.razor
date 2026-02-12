@@ -4,11 +4,11 @@
 @inject SensorState SensorState
 @implements IDisposable
 @rendermode InteractiveServer
-<h1>Hello, User!</h1>
-
-<h2>Welcome to your app to control the air-conditioning system!</h2>
+<h1>Hello!</h1>
+@* Main System to see current state of the bakery via BME280 sensor's readings *@
+<h2>Welcome to your app to control the systems in the Smart Bakery!</h2>
 <br />
-<h3>Live Sensor Data (1 d.p)</h3>
+<h3>Live Sensor Data of BME280(1 d.p)</h3>
 
 @if (SensorState.Latest is null)
 {

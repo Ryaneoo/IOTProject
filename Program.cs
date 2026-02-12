@@ -1,5 +1,5 @@
 using IOTP.Components;
-
+//running of the website with mqtt subscribers implemented 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
