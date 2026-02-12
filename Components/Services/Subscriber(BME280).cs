@@ -16,7 +16,7 @@ public class MqttSubscriber : BackgroundService
     //initalise all variables needed for subscribing
     private const string Broker = "ab4d2e8a48a6402ca2ff5ec16a2b05a2.s1.eu.hivemq.cloud";
     private const int Port = 8883;
-    private const string Topic = "tp/eng/iotp_project/grp_02/#";
+    private const string Topic = "tp/eng/iotp_project/grp_02/bme280";
     private const string Username = "iotp_grp02";
     private const string Password = "Iotp_grp02";
 

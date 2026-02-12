@@ -5,8 +5,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddSingleton<LoadingBayState>();
 builder.Services.AddSingleton<SensorState>();
 builder.Services.AddHostedService<MqttSubscriber>();
+builder.Services.AddHostedService<MqttSubscribers>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
